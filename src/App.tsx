@@ -7,7 +7,7 @@ import { motion } from "framer-motion"
 import { ScrollArea, Card, Button, TextField, Spinner, Inset, IconButton, ContextMenu, } from "@radix-ui/themes";
 
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
-import { CodeBracketIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { ComputerDesktopIcon, SparklesIcon } from "@heroicons/react/24/outline";
 
 import Feedback  from "./components/Feedback";
 
@@ -162,6 +162,12 @@ function Home() {
     //   backgroundRepeat: 'no-repeat'
     // }}
     >
+
+    <div className="absolute flex flex-col items-center justify-center h-screen w-screen bg-indigo-400 bg-opacity-40 backdrop-blur-lg z-50 right-0 top-0 sm:hidden ">
+        <ComputerDesktopIcon className="h-16 w-16 text-white" />
+        <h1 className="text-white font-serif text-2xl color-purple-200">pls open on desktop</h1>
+    </div>
+
       <div variant="surface" className="flex flex-row justify-between items-center p-2">
 
         <div className="">
@@ -257,7 +263,7 @@ function Home() {
       </div>
 
       <div className="font-mono text-sm ml-2">
-          <p>alpha v0.14</p>
+          <p>alpha v0.15</p>
       </div>
     </section>
   );
