@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview", 
+    "preview": "vite preview",
     "start": "npx http-server ./dist"
   },
   "dependencies": {
@@ -17,6 +17,7 @@
     "basictech-react": "^1.2.3",
     "dexie": "^3.2.7",
     "dexie-react-hooks": "^1.1.7",
+    "framer-motion": "^11.0.23",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-live": "^4.1.6"

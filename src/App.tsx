@@ -2,11 +2,14 @@
 import { useState, useEffect } from "react";
 import Dexie from "dexie";
 import { useLiveQuery } from "dexie-react-hooks"
+import { motion } from "framer-motion"
 
 import { ScrollArea, Card, Button, TextField, Spinner, Inset, IconButton, ContextMenu, } from "@radix-ui/themes";
 
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
 import { CodeBracketIcon, SparklesIcon } from "@heroicons/react/24/outline";
+
+import Feedback  from "./components/Feedback";
 
 const db = new Dexie('space');
 db.version(1).stores({
@@ -30,6 +33,12 @@ function Home() {
   const updateUI = async () => {
     setFetching(true);
     const msg_prompt = prompt !== '' ? prompt : emptyPrompt;
+
+    if (msg_prompt === '') {
+      setFetching(false);
+      return;
+    }
+
     setPrompt('')
     setEmptyPrompt('');
     const messages = [
@@ -74,11 +83,14 @@ function Home() {
       return response.json();
     }).catch((err) => {
       console.log(err);
+      setFetching(false);
     })
 
     if (resp.resp) {
       const comp = removeWrapper(resp.resp.content[0].text);
       setComponentCode(comp);
+
+     
       db.spaces.update(activeTab, { component: comp })
     }
 
@@ -100,11 +112,21 @@ function Home() {
     if (activeTab) {
       setSpace()
     }
-    // setComponentCode(spaces.get.component);
   }, [activeTab])
 
+  useEffect(() => {
+    if (spaces?.length === 0) {
+      db.spaces.add({ title: 'new', component: '<></>' })
+    }
+
+    if (activeTab === undefined && spaces?.length > 0) {
+      setActiveTab(spaces[0]?.id)
+    }
+
+
+  }, [spaces])
+
   const newTab = () => {
-    // const randomId = Math.floor(Math.random() * 1000);
     const timestamp = Date.now();
     const randomId = timestamp
     const key = 'new' + spaces.length
@@ -125,7 +147,7 @@ function Home() {
   }
 
   const debugeroo = async () => {
-    console.log(spaces)
+    console.log(spaces, activeTab)
 
   }
 
@@ -171,7 +193,8 @@ function Home() {
         </div>
 
 
-        <div className="flex flex-row items-center">
+        <div className="flex flex-row items-center gap-2">
+          {/* <Feedback /> */}
           <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button>
         </div>
       </div>
