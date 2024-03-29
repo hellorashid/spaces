@@ -8,8 +8,10 @@ import { ScrollArea, Card, Button, TextField, Spinner, Inset, IconButton, Contex
 
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
 import { ComputerDesktopIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import Marquee from "react-fast-marquee";
 
-import Feedback  from "./components/Feedback";
+
+import Feedback from "./components/Feedback";
 
 const db = new Dexie('space');
 db.version(1).stores({
@@ -20,6 +22,13 @@ db.version(1).stores({
 type Applet = {
   component_code: string,
 }
+
+const examples = [
+  "a todo app",
+  "a pomodoro timer",
+  "habit tracker",
+  "app to track my finances"
+]
 
 function Home() {
   const spaces = useLiveQuery(() => db.spaces.toArray(), []);
@@ -70,7 +79,7 @@ function Home() {
         ]
       },
     ]
-    const base_url = 'https://api.spaces.fun' 
+    const base_url = 'https://api.spaces.fun'
     const resp = await fetch(`${base_url}/generate`,
       {
         method: "POST",
@@ -90,17 +99,13 @@ function Home() {
       const comp = removeWrapper(resp.resp.content[0].text);
       setComponentCode(comp);
 
-     
+
       db.spaces.update(activeTab, { component: comp })
     }
 
     setFetching(false);
     console.log(resp);
   }
-
-  const handleChange = (event) => {
-    setPrompt(event.target.value);
-  };
 
   useEffect(() => {
     async function setSpace() {
@@ -126,10 +131,14 @@ function Home() {
 
   }, [spaces])
 
+  const handleChange = (event) => {
+    setPrompt(event.target.value);
+  };
+
   const newTab = () => {
     const timestamp = Date.now();
     const randomId = timestamp
-    const key = 'new' + spaces.length
+    const key = 'untitled' + spaces.length
     db.spaces.add({ title: key, component: '<></>', id: randomId })
     setActiveTab(randomId);
   }
@@ -138,42 +147,28 @@ function Home() {
     db.spaces.update(tabId, { title: newName })
   }
 
-  const saveTab = () => {
-    db.spaces.update(activeTab, { component: componentCode })
-  }
-
   const archiveTab = (tabId) => {
     db.spaces.delete(tabId)
   }
 
   const debugeroo = async () => {
     console.log(spaces, activeTab)
-
   }
 
-
-
   return (
-    <section className="task-home bg-grey-900 w-screen h-screen lg:max-w-full p-2 flex flex-col max-h-screen "
-    // style={{
-    //   backgroundImage: `url('./bg.webp')`,
-    //   backgroundPosition: 'center',
-    //   backgroundSize: 'cover',
-    //   backgroundRepeat: 'no-repeat'
-    // }}
-    >
+    <section className="task-home bg-grey-900 w-screen h-screen lg:max-w-full p-2 flex flex-col max-h-screen">
 
-    <div className="absolute flex flex-col items-center justify-center h-screen w-screen bg-indigo-400 bg-opacity-40 backdrop-blur-lg z-50 right-0 top-0 sm:hidden ">
+      <div className="absolute flex flex-col items-center justify-center h-screen w-screen bg-indigo-400 bg-opacity-40 backdrop-blur-lg z-50 right-0 top-0 sm:hidden ">
         <ComputerDesktopIcon className="h-16 w-16 text-white" />
         <h1 className="text-white font-serif text-2xl color-purple-200">pls open on desktop</h1>
-    </div>
+      </div>
 
       <div variant="surface" className="flex flex-row justify-between items-center p-2">
 
         <div className="">
           <a className="btn btn-ghost normal-case text-lg" onClick={debugeroo}>spaces.
-          
-          {/* <p className="font-serif font-thin italic relative bottom-3 right-2 opacity-70">α</p> */}
+
+            {/* <p className="font-serif font-thin italic relative bottom-3 right-2 opacity-70">α</p> */}
           </a>
         </div>
 
@@ -223,6 +218,10 @@ function Home() {
       </div>
       <div className="flex flex-row flex-1 text-black" >
 
+        {/* <motion.div className="absolute w-1/2 bg-slate-50 z-10 right-0 h-5/6 rounded bg-opacity-70 backdrop-blur-md p-4 ">
+          <h1 className="font-serif text-2xl ">browse examples</h1>
+        </motion.div> */}
+
         <LiveProvider code={componentCode} scope={{ useState, Button, Card, InputField, useEffect, Dexie }}>
           <Card variant="classic" variant="classic" className="flex-1 flex flex-col items-center lg:px-56 border-nose" >
 
@@ -230,8 +229,6 @@ function Home() {
             {fetching && <Spinner size={"3"} className="mt-20" />}
 
             {(componentCode == '<></>' && fetching === false) && <div>
-
-              {/* <p className="mt-20 opacity-20 font-serif text-4xl color-white">create <em>anything</em></p> */}
 
               <textarea placeholder="create anything..."
                 value={prompt}
@@ -244,6 +241,17 @@ function Home() {
                 }}
                 className="w-[1/2] h-96 focus:bg-white focus:bg-opacity-0 bg-white bg-opacity-0 focus:outline-none font-serif text-4xl text-white placeholder:text-white mt-20 resize-none"
               />
+
+              <Marquee pauseOnHover>
+                {examples.map((ex) => {
+                  return (<button onClick={() => setPrompt(ex)} 
+                    className="text-pink-950 font-serif bg-pink-100 p-2 rounded-sm bg-opacity-50 mx-4 opacity-80 hover:opacity-100">
+                    {ex}
+                  </button>)
+                })
+                }
+
+              </Marquee>
 
             </div>}
             <LiveError />
@@ -263,7 +271,7 @@ function Home() {
       </div>
 
       <div className="font-mono text-sm ml-2">
-          <p>alpha v0.15</p>
+        <p>alpha v0.16</p>
       </div>
     </section>
   );
@@ -285,14 +293,14 @@ function TabButton({ tabId, tabTitle, activeTab, setActiveTab, updateTabTitle, a
         <Button key={tabId} variant={tabId === activeTab ? "surface" : "soft"} onClick={() => setActiveTab(tabId)} className="text-white font-mono">{tabTitle}</Button>
       </ContextMenu.Trigger>
       <ContextMenu.Content className="font-mono" variant="soft">
-        <TextField.Root placeholder={tabTitle} value={newName} onChange={handleChange} 
+        <TextField.Root placeholder={tabTitle} value={newName} onChange={handleChange}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               updateTabTitle(tabId, newName)
 
             }
           }}
-        className="mb-2"></TextField.Root>
+          className="mb-2"></TextField.Root>
         <ContextMenu.Item onClick={() => updateTabTitle(tabId, newName)}>update name</ContextMenu.Item>
         <ContextMenu.Separator />
         <ContextMenu.Item onClick={() => archiveTab(tabId)}>archive</ContextMenu.Item>
@@ -333,12 +341,12 @@ function PasswordScreen() {
   const handleChange = (event) => {
     setPassInput(event.target.value);
   };
-  
+
   const handleSubit = () => {
     if (passInput === 'gtfol') {
       localStorage.setItem('spaces_pw', 'gtfol');
       window.location.reload();
-    } else { 
+    } else {
       console.log("wrong password. pls.")
     }
   }
@@ -347,7 +355,7 @@ function PasswordScreen() {
       <div className="flex flex-col items-center ">
         <SparklesIcon className="h-16 w-16 text-white" />
         <h1 className="text-white font-serif text-4xl">Enter Password</h1>
-        <TextField.Root placeholder="password" className="w-96 mt-4" type="password" value={passInput} onChange={handleChange} 
+        <TextField.Root placeholder="password" className="w-96 mt-4" type="password" value={passInput} onChange={handleChange}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleSubit()
@@ -358,13 +366,12 @@ function PasswordScreen() {
       </div>
     </div>
   )
-
 }
 
 
 function App() {
   const [showPassword, setShowPassword] = useState(true);
-  const [loading , setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const pass = localStorage.getItem('spaces_pw');
     if (pass === 'gtfol') {
@@ -383,13 +390,13 @@ function App() {
       }}
     >
 
-      { !loading && 
-      <>
-      { showPassword ?
-        <PasswordScreen /> :
-        <Home />
-      }
-      </>
+      {!loading &&
+        <>
+          {showPassword ?
+            <PasswordScreen /> :
+            <Home />
+          }
+        </>
       }
 
     </div>
