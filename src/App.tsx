@@ -61,7 +61,7 @@ function Home() {
         ]
       },
     ]
-    const base_url = 'https://spaces-server-production.up.railway.app/' 
+    const base_url = 'https://api.spaces.fun' 
     const resp = await fetch(`${base_url}/generate`,
       {
         method: "POST",
