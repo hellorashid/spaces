@@ -61,7 +61,8 @@ function Home() {
         ]
       },
     ]
-    const resp = await fetch("http://localhost:3000/generate",
+    const base_url = 'https://spaces-server-production.up.railway.app/' 
+    const resp = await fetch(`${base_url}/generate`,
       {
         method: "POST",
         headers: {

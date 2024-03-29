@@ -1,20 +1,20 @@
 {
-    "name": "Tsk ~ cozy task manager",
-    "short_name": "Tsk",
+    "name": "spaces ~ build anything",
+    "short_name": "Spaces",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#1E2329",
     "theme_color": "#3367D6",
-    "description": "The cozy task manager",
+    "description": "a productivity app to build anything",
     "icons": [
       {
-        "src": "/tsk-logo-144.png",
+        "src": "/spaces-logo.png",
         "sizes": "144x144",
         "type": "image/png", 
         "purpose": "any maskable"
       }, 
       {
-        "src": "/tsk-logo-512.png",
+        "src": "/spaces-logo.png",
         "sizes": "512x512",
         "type": "image/png", 
         "purpose": "any maskable"
