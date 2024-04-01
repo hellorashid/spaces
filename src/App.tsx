@@ -27,7 +27,7 @@ const examples = [
   "a todo app",
   "a pomodoro timer",
   "habit tracker",
-  "app to track my finances"
+  "app to track my finances", 
 ]
 
 function Home() {
@@ -154,9 +154,10 @@ function Home() {
   const debugeroo = async () => {
     console.log(spaces, activeTab)
   }
+  const darkmode = "bg-slate-900 opacity-80"
 
   return (
-    <section className="task-home bg-grey-900 w-screen h-screen lg:max-w-full p-2 flex flex-col max-h-screen">
+    <section className={`task-home bg-grey-900 w-screen h-screen lg:max-w-full p-2 flex flex-col max-h-screen `}>
 
       <div className="absolute flex flex-col items-center justify-center h-screen w-screen bg-indigo-400 bg-opacity-40 backdrop-blur-lg z-50 right-0 top-0 sm:hidden ">
         <ComputerDesktopIcon className="h-16 w-16 text-white" />
@@ -198,7 +199,7 @@ function Home() {
 
         <div className="flex flex-row items-center gap-2">
           {/* <Feedback /> */}
-          <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button>
+          {/* <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button> */}
         </div>
       </div>
 
