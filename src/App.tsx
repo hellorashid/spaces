@@ -355,16 +355,34 @@ function PasswordScreen() {
     <div className="flex flex-col items-center justify-center h-screen w-screen ">
       <div className="flex flex-col items-center ">
         <SparklesIcon className="h-16 w-16 text-white" />
-        <h1 className="text-white font-serif text-4xl">Enter Password</h1>
-        <TextField.Root placeholder="password" className="w-96 mt-4" type="password" value={passInput} onChange={handleChange}
+
+        <Button variant="solid" size={"4"} color="pink" className="mt-4 font-serif font-bold" onClick={()=>{ 
+          window.open("https://airtable.com/appGmjWlr4Af06Q7h/pagUTO8HKMWMSWZpP/form", "_blank")
+        
+        }}>sign up for beta access</Button>
+
+
+
+        <div className="">
+        <TextField.Root placeholder="invite code" className="w-96 mt-28 font-mono" type="password" value={passInput} onChange={handleChange}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleSubit()
             }
           }}
-        />
-        <Button variant="solid" color="pink" className="mt-4" onClick={handleSubit}>Enter</Button>
+          >
+
+          <TextField.Slot >
+          </TextField.Slot>
+          <TextField.Slot >
+            <Button variant="ghost" size={"3"} onClick={handleSubit} color="iris" className="font-serif" highContrast>
+              enter
+            </Button>
+          </TextField.Slot>
+        </TextField.Root>
+     
       </div>
+        </div>
     </div>
   )
 }
