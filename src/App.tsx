@@ -10,8 +10,8 @@ import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
 import { ComputerDesktopIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import Marquee from "react-fast-marquee";
 
-
-import Feedback from "./components/Feedback";
+import LoginButton from "./components/LoginButton";
+// import Feedback from "./components/Feedback";
 
 const db = new Dexie('space');
 db.version(1).stores({
@@ -167,10 +167,7 @@ function Home() {
       <div variant="surface" className="flex flex-row justify-between items-center p-2">
 
         <div className="">
-          <a className="btn btn-ghost normal-case text-lg" onClick={debugeroo}>spaces.
-
-            {/* <p className="font-serif font-thin italic relative bottom-3 right-2 opacity-70">α</p> */}
-          </a>
+          <a className="btn btn-ghost normal-case text-lg" onClick={debugeroo}>spaces.</a>
         </div>
 
         <div className="flex flex-row">
@@ -196,8 +193,9 @@ function Home() {
           </TextField.Root>
         </div>
 
-
         <div className="flex flex-row items-center gap-2">
+          
+          <LoginButton />
           {/* <Feedback /> */}
           {/* <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button> */}
         </div>
@@ -219,13 +217,9 @@ function Home() {
       </div>
       <div className="flex flex-row flex-1 text-black" >
 
-        {/* <motion.div className="absolute w-1/2 bg-slate-50 z-10 right-0 h-5/6 rounded bg-opacity-70 backdrop-blur-md p-4 ">
-          <h1 className="font-serif text-2xl ">browse examples</h1>
-        </motion.div> */}
 
         <LiveProvider code={componentCode} scope={{ useState, Button, Card, InputField, useEffect, Dexie }}>
           <Card variant="classic" variant="classic" className="flex-1 flex flex-col items-center lg:px-56 border-nose" >
-
 
             {fetching && <Spinner size={"3"} className="mt-20" />}
 
@@ -246,12 +240,12 @@ function Home() {
               <Marquee pauseOnHover>
                 {examples.map((ex) => {
                   return (<button onClick={() => setPrompt(ex)} 
-                    className="text-pink-950 font-serif bg-pink-100 p-2 rounded-sm bg-opacity-50 mx-4 opacity-80 hover:opacity-100">
+                  key={ex}
+                  className="text-pink-950 font-serif bg-pink-100 p-2 rounded-sm bg-opacity-50 mx-4 opacity-80 hover:opacity-100">
                     {ex}
                   </button>)
                 })
-                }
-
+              }
               </Marquee>
 
             </div>}
@@ -271,8 +265,8 @@ function Home() {
         </LiveProvider>
       </div>
 
-      <div className="font-mono text-sm ml-2">
-        <p>alpha v0.16</p>
+      <div className="font-mono text-sm ml-2 absolute bottom-3 opacity-60 hover:opacity-100 right-4">
+        <p>powered by basic.id ~ v0.16</p>
       </div>
     </section>
   );
@@ -356,12 +350,10 @@ function PasswordScreen() {
       <div className="flex flex-col items-center ">
         <SparklesIcon className="h-16 w-16 text-white" />
 
-        <Button variant="solid" size={"4"} color="pink" className="mt-4 font-serif font-bold" onClick={()=>{ 
+        <Button variant="solid" size={"4"} color="pink" className="mt-4 font-serif font-bold" 
+          onClick={()=>{ 
           window.open("https://airtable.com/appGmjWlr4Af06Q7h/pagUTO8HKMWMSWZpP/form", "_blank")
-        
         }}>sign up for beta access</Button>
-
-
 
         <div className="">
         <TextField.Root placeholder="invite code" className="w-96 mt-28 font-mono" type="password" value={passInput} onChange={handleChange}
@@ -371,7 +363,6 @@ function PasswordScreen() {
             }
           }}
           >
-
           <TextField.Slot >
           </TextField.Slot>
           <TextField.Slot >
@@ -403,6 +394,7 @@ function App() {
     <div className="App"
       style={{
         backgroundImage: `url('./bg.webp')`,
+        // backgroundImage: `url('./room.jpg')`,
         backgroundPosition: 'center',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat'

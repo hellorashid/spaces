@@ -2,6 +2,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Theme , ThemePanel} from '@radix-ui/themes';
+import { AuthProvider } from "./utils/BasicContext";
 
 import '@radix-ui/themes/styles.css';
 import "./index.css"
@@ -26,16 +27,14 @@ import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    {/* <AuthProvider > */}
+    <AuthProvider project_id="f34c0904-c1b6-438d-bdc1-1c2b91cd17d7" >
     <Theme 
       appearance="dark"
       accentColor="purple"
-      // grayColor="gray"
-      // panelBackground="translucent"
     >
       <App />
       {/* <ThemePanel /> */}
     </Theme>
-    {/* </AuthProvider> */}
+    </AuthProvider>
   </React.StrictMode>
 );
