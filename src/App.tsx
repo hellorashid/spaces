@@ -348,15 +348,22 @@ function PasswordScreen() {
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen ">
       <div className="flex flex-col items-center ">
-        <SparklesIcon className="h-16 w-16 text-white" />
+        <h1 className="font-serif font-bold text-pink-950"> an infinite workspace  </h1>
+       
 
         <Button variant="solid" size={"4"} color="pink" className="mt-4 font-serif font-bold" 
           onClick={()=>{ 
           window.open("https://airtable.com/appGmjWlr4Af06Q7h/pagUTO8HKMWMSWZpP/form", "_blank")
-        }}>sign up for beta access</Button>
+        }}>sign up for beta access
+        <SparklesIcon className="h-8 w-8 text-white" /></Button>
 
-        <div className="">
-        <TextField.Root placeholder="invite code" className="w-96 mt-28 font-mono" type="password" value={passInput} onChange={handleChange}
+
+     
+  
+   
+        <Card className="m-2 max-w-md mt-8 bg-slate-950 bg-opacity-75" variant="classic">
+
+        <TextField.Root placeholder="invite code" className="w-full font-mono mb-4" type="password" value={passInput} onChange={handleChange}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleSubit()
@@ -371,14 +378,10 @@ function PasswordScreen() {
             </Button>
           </TextField.Slot>
         </TextField.Root>
-     
-      </div>
 
-      <div>
-        <Card className="mt-4 bg-slate-950 bg-opacity-75" variant="classic">
-        <p className="text-white font-mono text-sm ">want an invite code? DM your favorite productivity app on twitter <a href="https://x.com/razberrychai">@razberrychai</a> </p>
+        <p className="text-white font-mono text-sm ">want an invite code? DM me your favorite productivity app on twitter <a className="text-white font-bold" href="https://x.com/razberrychai">@razberrychai</a> :) </p>
         </Card>
-      </div>
+
         </div>
     </div>
   )
