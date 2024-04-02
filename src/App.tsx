@@ -347,8 +347,10 @@ function PasswordScreen() {
   }
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen ">
-      <div className="flex flex-col items-center ">
+      <div className="flex flex-col items-center text-center ">
         <h1 className="font-serif font-bold text-pink-950"> an infinite workspace  </h1>
+
+
        
 
         <Button variant="solid" size={"4"} color="pink" className="mt-4 font-serif font-bold" 
