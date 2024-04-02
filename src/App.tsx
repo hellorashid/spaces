@@ -373,6 +373,12 @@ function PasswordScreen() {
         </TextField.Root>
      
       </div>
+
+      <div>
+        <Card className="mt-4 bg-slate-950 bg-opacity-75" variant="classic">
+        <p className="text-white font-mono text-sm ">want an invite code? DM your favorite productivity app on twitter <a href="https://x.com/razberrychai">@razberrychai</a> </p>
+        </Card>
+      </div>
         </div>
     </div>
   )
