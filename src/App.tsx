@@ -47,7 +47,7 @@ function Home() {
   const [showEditor, setShowEditor] = useState(false);
   const [componentCode, setComponentCode] = useState('<></>');
   const [showChat, setShowChat] = useState(false);
-  const [isDark, setDark] = useState(false)
+  const [isDark, setDark] = useState<boolean>(localStorage.getItem('spaces_dark') === 'true' ? true : false)
 
   const updateUI = async () => {
     setFetching(true);
@@ -186,6 +186,7 @@ function Home() {
 
   const toggleDark = () => { 
     setDark(!isDark)
+    localStorage.setItem('spaces_dark', !isDark)
   }
 
   return (
@@ -308,7 +309,7 @@ function Home() {
 
 
 
-          <div className="w-full max-w-lg text-white">
+          <div className={`w-full max-w-lg ${isDark ? "text-white" : "text-black"}`}>
               <LivePreview />
 
               {/* <WelcomeScreen /> */}
@@ -337,7 +338,7 @@ function Home() {
       </div>
 
       <div className="font-mono text-sm ml-2 absolute bottom-3 opacity-60 hover:opacity-100 left-4">
-        <p>powered by basic.id ~ v0.17</p>
+        <p>powered by basic.id ~ v0.18</p>
       </div>
     </section>
   );
