@@ -38,27 +38,63 @@ const examples = [
   "app to track my finances",
 ]
 
+const PromptBox = ({fetching, updateUI}) => { 
+  const [prompt, setPrompt] = useState('')
+
+  const handleChange = (event) => {
+    setPrompt(event.target.value);
+  };
+
+  return (
+    <TextField.Root 
+    placeholder="wassup?"
+    variant="surface"
+    size="3"
+    value={prompt}
+    onChange={handleChange}
+    className="w-96 rounded-full"
+    onKeyDown={(e) => {
+      if (e.key === 'Enter') {
+        updateUI({prompt})
+      }
+    }}
+  >
+    <TextField.Slot >
+    </TextField.Slot>
+    <TextField.Slot >
+      <Button variant="ghost" size={"3"} onClick={() => updateUI({prompt})} color="iris" loading={fetching} className="font-serif rounded-full" highContrast>
+        update
+      </Button>
+    </TextField.Slot>
+  </TextField.Root>
+  )
+}
+
+
 function Home() {
   const spaces = useLiveQuery(() => db.spaces.toArray(), []);
   const [activeTab, setActiveTab] = useState(db.spaces[0]?.id);
   const [fetching, setFetching] = useState(false);
-  const [prompt, setPrompt] = useState('');
+  const [fetchingTab, setFetchingTab] = useState('')
+
+
   const [emptyPrompt, setEmptyPrompt] = useState('');
   const [showEditor, setShowEditor] = useState(false);
   const [componentCode, setComponentCode] = useState('<></>');
-  const [showChat, setShowChat] = useState(false);
+  // const [showChat, setShowChat] = useState(false);
   const [isDark, setDark] = useState<boolean>(localStorage.getItem('spaces_dark') === 'true' ? true : false)
 
-  const updateUI = async () => {
+  const updateUI = async ({prompt = ''} : {prompt: string}) => {
     setFetching(true);
+    setFetchingTab(activeTab)
     const msg_prompt = prompt !== '' ? prompt : emptyPrompt;
 
     if (msg_prompt === '') {
       setFetching(false);
+      setFetchingTab('')
       return;
     }
 
-    setPrompt('')
     setEmptyPrompt('');
     const messages = [
       {
@@ -89,8 +125,8 @@ function Home() {
         ]
       },
     ]
-    const base_url = 'https://api.spaces.fun'
-    // const base_url = 'http://localhost:3003'
+    // const base_url = 'https://api.spaces.fun'
+    const base_url = 'http://localhost:3003'
     const resp = await fetch(`${base_url}/generate`,
       {
         method: "POST",
@@ -109,12 +145,13 @@ function Home() {
     if (resp.resp) {
       const comp = removeWrapper(resp.resp.content[0].text);
       setComponentCode(comp);
-
+      setActiveTab(fetchingTab)
 
       db.spaces.update(activeTab, { component: comp })
     }
 
     setFetching(false);
+    setFetchingTab('')
     console.log(resp);
   }
 
@@ -138,13 +175,7 @@ function Home() {
     if (activeTab === undefined && spaces?.length > 0) {
       setActiveTab(spaces[0]?.id)
     }
-
-
   }, [spaces])
-
-  const handleChange = (event) => {
-    setPrompt(event.target.value);
-  };
 
   const newTab = () => {
     const timestamp = Date.now();
@@ -163,6 +194,7 @@ function Home() {
   }
 
   const debugeroo = async () => {
+    // console.log(window.location.hostname)
     // console.log(spaces, activeTab)
     // const notes = new Dexie('notes');
     // notes.version(1).stores({
@@ -189,6 +221,10 @@ function Home() {
     localStorage.setItem('spaces_dark', !isDark)
   }
 
+  const handleChange = (e) => { 
+     setEmptyPrompt(e.target.value)
+  }
+
   return (
     <section className={`task-home bg-grey-900 w-screen h-screen lg:max-w-full p-2 flex flex-col max-h-screen ${isDark ? darkmode : ''}  `}>
 
@@ -203,28 +239,7 @@ function Home() {
           <Button variant="soft" className=" text-white normal-case text-lg" onClick={debugeroo}>spaces.</Button>
         </div>
 
-        <div className="flex flex-row">
-          <TextField.Root placeholder="wassup?"
-            variant="surface"
-            size="3"
-            value={prompt}
-            onChange={handleChange}
-            className="w-96"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                updateUI()
-              }
-            }}
-          >
-            <TextField.Slot >
-            </TextField.Slot>
-            <TextField.Slot >
-              <Button variant="ghost" size={"3"} onClick={updateUI} color="iris" loading={fetching} className="font-serif" highContrast>
-                create
-              </Button>
-            </TextField.Slot>
-          </TextField.Root>
-        </div>
+   
 
         <div className="flex flex-row items-center gap-2">
 
@@ -270,19 +285,19 @@ function Home() {
             useState, useEffect, Dexie, useRef, useCallback,
             Button, Card, InputField, Checkbox, Flex
           }}>
-          <Card variant="classic" className="flex-1 flex flex-col items-center " >
+          <Card variant="classic" className="flex-1 flex flex-col items-center " key={activeTab} >
 
-            {fetching && <Spinner size={"3"} className="mt-20" />}
+            {(fetching === true && activeTab === fetchingTab  ) && <Spinner size={"3"} className="mt-20" color="pink"  />}
 
             {(componentCode == '<></>' && fetching === false) && <div>
 
               <textarea placeholder="create anything..."
-                value={prompt}
+                value={emptyPrompt}
                 onChange={handleChange}
                 type="textarea"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    updateUI()
+                    updateUI({prompt: emptyPrompt})
                   }
                 }}
                 className="w-[1/2] h-96 focus:bg-white focus:bg-opacity-0 bg-white bg-opacity-0 focus:outline-none font-serif text-4xl text-white placeholder:text-white mt-20 ml-20 resize-none"
@@ -290,7 +305,7 @@ function Home() {
 
               <Marquee pauseOnHover>
                 {examples.map((ex) => {
-                  return (<button onClick={() => setPrompt(ex)}
+                  return (<button onClick={() => setEmptyPrompt(ex)}
                     key={ex}
                     className="text-pink-950 font-serif bg-pink-100 p-2 rounded-sm bg-opacity-50 mx-4 opacity-80 hover:opacity-100">
                     {ex}
@@ -306,7 +321,7 @@ function Home() {
             <Background />
             <Controls />
           </ReactFlow> */}
-
+        
 
 
           <div className={`w-full max-w-lg ${isDark ? "text-white" : "text-black"}`}>
@@ -314,6 +329,15 @@ function Home() {
 
               {/* <WelcomeScreen /> */}
             </div>
+
+          
+
+        {(componentCode != '<></>' && fetching === false) && 
+
+          <div className="absolute bottom-4 flex flex-row">
+            <PromptBox updateUI={updateUI} fetching={fetching} />
+          </div>
+            }
 
           </Card>
 
@@ -337,8 +361,8 @@ function Home() {
       
       </div>
 
-      <div className="font-mono text-sm ml-2 absolute bottom-3 opacity-60 hover:opacity-100 left-4">
-        <p>powered by basic.id ~ v0.18</p>
+      <div className="font-mono text-sm ml-2 absolute bottom-3 opacity-60 hover:opacity-100 left-2">
+        <p>alpha ~ v0.19</p>
       </div>
     </section>
   );
@@ -346,29 +370,31 @@ function Home() {
 
 const WelcomeScreen = () => { 
   return (
-    <div className="flex flex-col  justify-center w-full bg-slate-700 p-4 rounded-md bg-opacity-70">
+    <div className="flex flex-col  justify-center w-full bg-slate-700 p-4 rounded-md bg-opacity-20">
 
       <h1 className="font-serif text-4xl">welcome to spaces</h1>
       <p className="font-serif text-lg">spaces is an infinite workspace to create anything. some things to get you started</p>
       <p className="font-serif text-lg">1. create a new tab to get started (the plus icon) </p>
       <p className="font-serif text-lg">2. type in the kind of app you want, or begin with the examples</p>
       <p className="font-serif text-lg">3. there are some things it cannot create. play around with it to test the limits</p>
-      <p className="font-serif text-lg">4. after you create something, use the top bar to futher customize. try changing the look, or adding features.</p>
-      <p className="font-serif text-lg">4. if something breaks, sometimes best to create a new tab and start over.</p>
+      <p className="font-serif text-lg">4. after you create something, use the bottom bar to futher customize. try changing the look, or adding features.</p>
+      <p className="font-serif text-lg">5. if something breaks, sometimes best to create a new tab and start over.</p>
     </div>
   )
 }
 const WelcomeComponent = `function WelcomeScreen () { 
   return (
-    <div className="flex flex-col  justify-center w-full bg-slate-700 p-4 rounded-md bg-opacity-70">
+    <div className="flex flex-col  justify-center w-full bg-slate-700 p-4 rounded-md bg-opacity-20">
 
       <h1 className="font-serif text-4xl">welcome to spaces</h1>
-      <p className="font-serif text-lg">spaces is an infinite workspace to create anything. some things to get you started</p>
+      <p className="font-serif text-lg pb-2">an infnite workspace to create personal tools ~ to get started: </p>
       <p className="font-serif text-lg">1. create a new tab to get started (the plus icon) </p>
       <p className="font-serif text-lg">2. type in the kind of app you want, or begin with the examples</p>
       <p className="font-serif text-lg">3. there are some things it cannot create. play around with it to test the limits</p>
       <p className="font-serif text-lg">4. after you create something, use the top bar to futher customize. try changing the look, or adding features.</p>
-      <p className="font-serif text-lg">4. if something breaks, sometimes best to create a new tab and start over.</p>
+      <p className="font-serif text-lg">5. if something breaks, sometimes best to create a new tab and start over.</p>
+      <p className="font-serif text-lg">6. have fun :) dm me with feedback pls!</p>
+
     </div>
   )
 }`
