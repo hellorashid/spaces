@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, useRef, useCallback} from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Dexie from "dexie";
 import { useLiveQuery } from "dexie-react-hooks"
 import { motion } from "framer-motion"
@@ -13,6 +13,7 @@ import Marquee from "react-fast-marquee";
 // import { Resizable } from 're-resizable';
 
 import LoginButton from "@/components/LoginButton";
+import PromptBox from "@/components/PromptBox";
 
 // import ReactFlow, { Controls, Background } from 'reactflow';
 // import 'reactflow/dist/style.css';
@@ -38,35 +39,82 @@ const examples = [
   "app to track my finances",
 ]
 
-const PromptBox = ({fetching, updateUI}) => { 
-  const [prompt, setPrompt] = useState('')
+function CardComponent({ 
+  componentCode, setComponentCode,
+  isDark, updateUI, showEditor,
+  fetching, fetchingTab , activeTab, setActiveTab }) {
 
-  const handleChange = (event) => {
-    setPrompt(event.target.value);
-  };
-
+  const [emptyPrompt, setEmptyPrompt] = useState('');
+  const handleChange = (e) => {
+    setEmptyPrompt(e.target.value)
+  }
   return (
-    <TextField.Root 
-    placeholder="wassup?"
-    variant="surface"
-    size="3"
-    value={prompt}
-    onChange={handleChange}
-    className="w-96 rounded-full"
-    onKeyDown={(e) => {
-      if (e.key === 'Enter') {
-        updateUI({prompt})
+    <LiveProvider code={componentCode}
+      //  noInline={true}
+      // transformCode={(code) => {
+      //   return code;
+      // }}
+      scope={{
+        useState, useEffect, Dexie, useRef, useCallback,
+        Button, Card, InputField, Checkbox, Flex
+      }}>
+      <Card variant="classic" className="flex-1 flex flex-col items-center " key={activeTab} >
+
+        {(fetching === true && activeTab === fetchingTab) && <Spinner size={"3"} className="mt-20" color="pink" />}
+
+        {(componentCode == '<></>' && fetching === false) && <div>
+
+          <textarea placeholder="create anything..."
+            value={emptyPrompt}
+            onChange={handleChange}
+            type="textarea"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                updateUI({ prompt: emptyPrompt })
+              }
+            }}
+            className="w-[1/2] h-96 focus:bg-white focus:bg-opacity-0 bg-white bg-opacity-0 focus:outline-none font-serif text-4xl text-white placeholder:text-white mt-20 ml-20 resize-none"
+          />
+
+          <Marquee pauseOnHover>
+            {examples.map((ex) => {
+              return (<button onClick={() => setEmptyPrompt(ex)}
+                key={ex}
+                className="text-pink-950 font-serif bg-pink-100 p-2 rounded-sm bg-opacity-50 mx-4 opacity-80 hover:opacity-100">
+                {ex}
+              </button>)
+            })
+            }
+          </Marquee>
+
+        </div>}
+
+        <LiveError />
+
+        <div className={`w-full max-w-lg ${isDark ? "text-white" : "text-black"}`}>
+          <LivePreview />
+        </div>
+
+        {(componentCode != '<></>' && fetching === false) &&
+          <div className="absolute bottom-4 flex flex-row">
+            <PromptBox updateUI={updateUI} fetching={fetching} />
+          </div>
+        }
+
+      </Card>
+
+      {showEditor &&
+        <Card className="min-w-[64px] max-w-lg ml-2 font-mono">
+          <Inset>
+            <ScrollArea style={{ height: '750px' }}>
+              <LiveEditor onChange={(e) => setComponentCode(e)} />
+            </ScrollArea>
+          </Inset>
+        </Card>
       }
-    }}
-  >
-    <TextField.Slot >
-    </TextField.Slot>
-    <TextField.Slot >
-      <Button variant="ghost" size={"3"} onClick={() => updateUI({prompt})} color="iris" loading={fetching} className="font-serif rounded-full" highContrast>
-        update
-      </Button>
-    </TextField.Slot>
-  </TextField.Root>
+
+    </LiveProvider>
+
   )
 }
 
@@ -81,10 +129,10 @@ function Home() {
   const [emptyPrompt, setEmptyPrompt] = useState('');
   const [showEditor, setShowEditor] = useState(false);
   const [componentCode, setComponentCode] = useState('<></>');
-  // const [showChat, setShowChat] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [isDark, setDark] = useState<boolean>(localStorage.getItem('spaces_dark') === 'true' ? true : false)
 
-  const updateUI = async ({prompt = ''} : {prompt: string}) => {
+  const updateUI = async ({ prompt = '' }: { prompt: string }) => {
     setFetching(true);
     setFetchingTab(activeTab)
     const msg_prompt = prompt !== '' ? prompt : emptyPrompt;
@@ -125,8 +173,8 @@ function Home() {
         ]
       },
     ]
-    // const base_url = 'https://api.spaces.fun'
-    const base_url = 'http://localhost:3003'
+    const base_url = 'https://api.spaces.fun'
+    // const base_url = 'http://localhost:3003'
     const resp = await fetch(`${base_url}/generate`,
       {
         method: "POST",
@@ -207,22 +255,15 @@ function Home() {
     // renderComponent()
   }
 
-  const renderComponent = () => { 
-    const comp = eval(componentCode);
+  // const renderComponent = () => { 
+  //   const comp = eval(componentCode);
+  // }
 
-    console.log(comp)
-    // return comp;
-
-  }
   const darkmode = "bg-slate-900 opacity-80"
 
-  const toggleDark = () => { 
+  const toggleDark = () => {
     setDark(!isDark)
     localStorage.setItem('spaces_dark', !isDark)
-  }
-
-  const handleChange = (e) => { 
-     setEmptyPrompt(e.target.value)
   }
 
   return (
@@ -239,15 +280,15 @@ function Home() {
           <Button variant="soft" className=" text-white normal-case text-lg" onClick={debugeroo}>spaces.</Button>
         </div>
 
-   
+
 
         <div className="flex flex-row items-center gap-2">
 
           <IconButton variant="ghost" className="bg-opacity-0" onClick={toggleDark}>
-            { isDark ? <SunIcon color="white" width={"20"} /> : <MoonIcon color="white" width={"20"} />}
+            {isDark ? <SunIcon color="white" width={"20"} /> : <MoonIcon color="white" width={"20"} />}
           </IconButton>
           {/* <Button onClick={toggleDark} className="font-mono" variant="outline" highContrast={true}> dark </Button> */}
-          
+
           <LoginButton />
           {/* <Feedback /> */}
 
@@ -257,118 +298,49 @@ function Home() {
       <div className="flex justify-start items-center p-1 gap-2 text-white">
         {spaces?.map((tab) => {
           return <TabButton
-          key={tab.id}
-          tabId={tab.id}
-          tabTitle={tab.title}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          updateTabTitle={updateTabName}
-          archiveTab={archiveTab}
+            key={tab.id}
+            tabId={tab.id}
+            tabTitle={tab.title}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            updateTabTitle={updateTabName}
+            archiveTab={archiveTab}
           />
         })}
         <Button variant="soft" className="text-white" onClick={newTab}> + </Button>
 
         <div className="absolute right-4 gap-2 flex">
-        {/* <Button onClick={() => setShowChat(!showChat)} className="font-mono" variant="outline" highContrast={true}> chat </Button> */}
-        {/* <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button> */}
+          {/* <Button onClick={() => setShowChat(!showChat)} className="font-mono" variant="outline" highContrast={true}> chat </Button> */}
+          {/* <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button> */}
         </div>
       </div>
       <div className="flex flex-row flex-1 text-black" >
 
 
-        <LiveProvider code={componentCode}
-          //  noInline={true}
-          // transformCode={(code) => {
-          //   return code;
-          // }}
-          scope={{
-            useState, useEffect, Dexie, useRef, useCallback,
-            Button, Card, InputField, Checkbox, Flex
-          }}>
-          <Card variant="classic" className="flex-1 flex flex-col items-center " key={activeTab} >
-
-            {(fetching === true && activeTab === fetchingTab  ) && <Spinner size={"3"} className="mt-20" color="pink"  />}
-
-            {(componentCode == '<></>' && fetching === false) && <div>
-
-              <textarea placeholder="create anything..."
-                value={emptyPrompt}
-                onChange={handleChange}
-                type="textarea"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    updateUI({prompt: emptyPrompt})
-                  }
-                }}
-                className="w-[1/2] h-96 focus:bg-white focus:bg-opacity-0 bg-white bg-opacity-0 focus:outline-none font-serif text-4xl text-white placeholder:text-white mt-20 ml-20 resize-none"
-              />
-
-              <Marquee pauseOnHover>
-                {examples.map((ex) => {
-                  return (<button onClick={() => setEmptyPrompt(ex)}
-                    key={ex}
-                    className="text-pink-950 font-serif bg-pink-100 p-2 rounded-sm bg-opacity-50 mx-4 opacity-80 hover:opacity-100">
-                    {ex}
-                  </button>)
-                })
-                }
-              </Marquee>
-
-            </div>}
-            <LiveError />
-            {/* 
-            <ReactFlow>
-            <Background />
-            <Controls />
-          </ReactFlow> */}
-        
+          <CardComponent 
+            componentCode={componentCode}
+            fetching={fetching}
+            isDark={isDark}
+            updateUI={updateUI}
+          />
 
 
-          <div className={`w-full max-w-lg ${isDark ? "text-white" : "text-black"}`}>
-              <LivePreview />
-
-              {/* <WelcomeScreen /> */}
-            </div>
-
-          
-
-        {(componentCode != '<></>' && fetching === false) && 
-
-          <div className="absolute bottom-4 flex flex-row">
-            <PromptBox updateUI={updateUI} fetching={fetching} />
-          </div>
-            }
-
-          </Card>
-
-          {showEditor &&
-            <Card className="min-w-[64px] max-w-lg ml-2 font-mono">
-              <Inset>
-                <ScrollArea style={{ height: '750px' }}>
-                  <LiveEditor onChange={(e) => setComponentCode(e)} />
-                </ScrollArea>
-              </Inset>
-            </Card>
-          }
-
-          {/* {showChat &&
+        {/* {showChat &&
             <Card className="w-[400px] ml-2 font-mono">
               <ChatUI />
             </Card>
           } */}
-        </LiveProvider>
 
-      
       </div>
 
       <div className="font-mono text-sm ml-2 absolute bottom-3 opacity-60 hover:opacity-100 left-2">
-        <p>alpha ~ v0.19</p>
+        <p>alpha ~ v0.20</p>
       </div>
     </section>
   );
 }
 
-const WelcomeScreen = () => { 
+const WelcomeScreen = () => {
   return (
     <div className="flex flex-col  justify-center w-full bg-slate-700 p-4 rounded-md bg-opacity-20">
 
@@ -400,7 +372,7 @@ const WelcomeComponent = `function WelcomeScreen () {
 }`
 
 
-type ChatMessage = { 
+type ChatMessage = {
   id: number
   content: [
     {
@@ -414,7 +386,7 @@ type ChatMessage = {
 const ChatUI = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  
+
   const getData = async () => {
     const notes = new Dexie('notesDB');
     notes.version(1).stores({
@@ -426,17 +398,17 @@ const ChatUI = () => {
     const grocery = new Dexie('groceryList');
     grocery.version(1).stores({ items: '++id, name' });
 
-    const  allgrocery= await grocery.items.toArray();
+    const allgrocery = await grocery.items.toArray();
 
     const todo = new Dexie('todos');
     todo.version(1).stores({ todos: '++id, text, dueDate' });
     const alltodo = await todo.todos.toArray();
 
-    const final = { notes: allnotes, grocery: allgrocery, todo: alltodo}
+    const final = { notes: allnotes, grocery: allgrocery, todo: alltodo }
     return final;
   }
 
-  const handleSubmit = async () => { 
+  const handleSubmit = async () => {
     const updated = [...messages, {
       content: [{
         type: "text",
@@ -488,10 +460,10 @@ const ChatUI = () => {
 
   return (
     <div className="flex flex-col items-center justify-center">
-        <h1 className="font-bold">chat</h1>
+      <h1 className="font-bold">chat</h1>
 
-        <div className="flex flex-col items-center justify-center w-full">
-          <ScrollArea style={{ height: '600px' }} >
+      <div className="flex flex-col items-center justify-center w-full">
+        <ScrollArea style={{ height: '600px' }} >
           {messages.map((msg) => {
             return (
               <div key={msg.content[0].text} className="flex flex-col items-start justify-start mb-8">
@@ -500,25 +472,25 @@ const ChatUI = () => {
               </div>
             )
           })}
-          </ScrollArea>
-        </div>
+        </ScrollArea>
+      </div>
 
-        <div className="absolute bottom-5 flex flex-row  w-full p-2 ">
-          <TextField.Root placeholder="ask anything ... " value={newMessage}
+      <div className="absolute bottom-5 flex flex-row  w-full p-2 ">
+        <TextField.Root placeholder="ask anything ... " value={newMessage}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleSubmit()
             }
           }}
           onChange={(e) => setNewMessage(e.target.value)} className="flex-1 w-full" />
-          <Button variant="solid" onClick={handleSubmit}>send</Button>
-        </div>
+        <Button variant="solid" onClick={handleSubmit}>send</Button>
+      </div>
     </div>
   )
 }
 
 
-const DynamicDoc = () => { 
+const DynamicDoc = () => {
   const [text, setText] = useState('');
 
   return (
@@ -526,7 +498,7 @@ const DynamicDoc = () => {
       <h1>dynamic doc</h1>
 
 
-      <TextArea  value={text} onChange={(e) => setText(e.target.value)} className="outline-none" />
+      <TextArea value={text} onChange={(e) => setText(e.target.value)} className="outline-none" />
     </div>
 
   )
@@ -582,7 +554,9 @@ function ErrorBoundary({ children }) {
 
 function removeWrapper(str) {
   const lines = str.split('\n');
+  // console.log(lines)
   if (lines[0].includes('jsx')) {
+
     lines.shift();
     lines.pop();
   }
