@@ -22,6 +22,8 @@ import PromptBox from "@/components/PromptBox";
 // import {Button}  from "@/components/button";
 // import Feedback from "./components/Feedback";
 
+const invite_codes = ['gtfol', 'YCS24', 'ycs24']
+
 const db = new Dexie('space');
 db.version(1).stores({
   spaces: '++id', // Primary key and indexed props,
@@ -623,8 +625,8 @@ function PasswordScreen() {
   };
 
   const handleSubit = () => {
-    if (passInput === 'gtfol') {
-      localStorage.setItem('spaces_pw', 'gtfol');
+    if (invite_codes.includes(passInput)) {
+      localStorage.setItem('spaces_pw', passInput);
       window.location.reload();
     } else {
       console.log("wrong password. pls.")
@@ -675,12 +677,14 @@ function PasswordScreen() {
 }
 
 
+
+
 function App() {
   const [showPassword, setShowPassword] = useState(true);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const pass = localStorage.getItem('spaces_pw');
-    if (pass === 'gtfol') {
+    if (invite_codes.includes(pass)) {
       setShowPassword(false);
     }
     setLoading(false);
