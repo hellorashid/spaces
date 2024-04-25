@@ -620,6 +620,24 @@ function NotesApp() {
 
 function PasswordScreen() {
   const [passInput, setPassInput] = useState('');
+
+  const getInviteQueryParam = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('invite');
+  };
+
+  useEffect(() => { 
+    const getInviteQueryParam = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const inv = urlParams.get('invite');
+      if (invite_codes.includes(inv)) {
+        setPassInput(inv);
+      }
+    };
+    getInviteQueryParam()
+  }
+  , [])
+
   const handleChange = (event) => {
     setPassInput(event.target.value);
   };
@@ -652,7 +670,7 @@ function PasswordScreen() {
 
         <Card className="m-2 max-w-md mt-8 bg-slate-950 bg-opacity-75" variant="classic">
 
-          <TextField.Root placeholder="invite code" className="w-full font-mono mb-4" type="password" value={passInput} onChange={handleChange}
+          <TextField.Root placeholder="invite code" className="w-full font-mono mb-4"  value={passInput} onChange={handleChange}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 handleSubit()
