@@ -14,6 +14,7 @@ import Marquee from "react-fast-marquee";
 
 import LoginButton from "@/components/LoginButton";
 import PromptBox from "@/components/PromptBox";
+import DesignToolbar from "@/components/DesignToolbar";
 
 // import ReactFlow, { Controls, Background } from 'reactflow';
 // import 'reactflow/dist/style.css';
@@ -286,9 +287,10 @@ function Home() {
 
         <div className="flex flex-row items-center gap-2">
 
-          <IconButton variant="ghost" className="bg-opacity-0" onClick={toggleDark}>
+          {/* <IconButton variant="ghost" className="bg-opacity-0" onClick={toggleDark}>
             {isDark ? <SunIcon color="white" width={"20"} /> : <MoonIcon color="white" width={"20"} />}
-          </IconButton>
+          </IconButton> */}
+          <DesignToolbar />
           {/* <Button onClick={toggleDark} className="font-mono" variant="outline" highContrast={true}> dark </Button> */}
 
           <LoginButton />
@@ -492,19 +494,7 @@ const ChatUI = () => {
 }
 
 
-const DynamicDoc = () => {
-  const [text, setText] = useState('');
 
-  return (
-    <div>
-      <h1>dynamic doc</h1>
-
-
-      <TextArea value={text} onChange={(e) => setText(e.target.value)} className="outline-none" />
-    </div>
-
-  )
-}
 
 const InputField = (props) => {
   return <TextField.Root {...props} />
@@ -565,58 +555,6 @@ function removeWrapper(str) {
   return lines.join('\n');
 }
 
-
-function NotesApp() {
-  const [notes, setNotes] = useState([]);
-  const [newNote, setNewNote] = useState('');
-
-  const db = new Dexie('notesDB');
-  db.version(1).stores({ notes: '++id, text' });
-
-  useEffect(() => {
-    db.notes.toArray().then(setNotes);
-  }, [], []);
-
-  const addNote = async () => {
-    if (newNote.trim()) {
-      await db.notes.add({ text: newNote });
-      setNotes([...notes, { text: newNote }]);
-      setNewNote('');
-    }
-  };
-
-  const deleteNote = async (id) => {
-    await db.notes.delete(id);
-    setNotes(notes.filter((note) => note.id !== id));
-  };
-
-  return (
-    <div className="flex  flex-col items-center p-4 w-full">
-      <div className="w-full max-w-md flex justify-between">
-        <InputField
-          value={newNote}
-          onChange={(e) => setNewNote(e.target.value)}
-          placeholder="Add a new note..."
-          className="mb-4 flex-grow h-12"
-          size="2"
-        />
-        <Button variant="outline" color="pink" onClick={addNote} className="mb-4 ml-2">
-          <span className="text-white">Add Note</span>
-        </Button>
-      </div>
-      <div className="w-full max-w-md">
-        {notes.map((note) => (
-          <Card key={note.id} className="mb-2 w-full">
-            <div className="flex justify-between items-center">
-              <p>{note.text}</p>
-              <Button color="pink" onClick={() => deleteNote(note.id)}>Delete</Button>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function PasswordScreen() {
   const [passInput, setPassInput] = useState('');
@@ -693,9 +631,6 @@ function PasswordScreen() {
     </div>
   )
 }
-
-
-
 
 function App() {
   const [showPassword, setShowPassword] = useState(true);
