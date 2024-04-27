@@ -647,7 +647,6 @@ function App() {
     <div className="App"
       style={{
         backgroundImage: `url('./bg.webp')`,
-        // backgroundImage: `url('./room.jpg')`,
         backgroundPosition: 'center',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat'
