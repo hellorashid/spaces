@@ -4,21 +4,23 @@ import { createContext, useContext, useEffect, useState } from 'react'
 type Theme = { 
     appearance: string,
     [key: string]: any
+    
 }
 
 
-export const AuthContext = createContext<{ 
+export const AppContext = createContext<{ 
     unicorn: string, 
     theme: Theme,
-
+    setTheme?: (theme: Theme) => void
 }>({
     unicorn: "🦄", 
     theme: {appearance: "dark"},
+    setTheme: () => {}
 });
 
 
 
-export function AuthProvider({children, project_id}: {children: React.ReactNode, project_id: string}) {
+export function AppProvider({children, project_id}: {children: React.ReactNode, project_id: string}) {
     const [isLoaded, setIsLoaded] = useState(false)
     const [theme, setTheme] = useState<Theme>({appearance: "dark"})
 
@@ -30,15 +32,16 @@ export function AuthProvider({children, project_id}: {children: React.ReactNode,
 
 
     return (
-    <AuthContext.Provider value={{
+    <AppContext.Provider value={{
         unicorn: "🦄",
         theme: theme,
+        setTheme: setTheme
     }}>
     {children}
-    </AuthContext.Provider>
+    </AppContext.Provider>
     )
   }
 
-export function useAuth() {
-    return useContext(AuthContext);
+export function useAppContext() {
+    return useContext(AppContext);
   }

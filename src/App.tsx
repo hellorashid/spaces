@@ -15,13 +15,14 @@ import Marquee from "react-fast-marquee";
 import LoginButton from "@/components/LoginButton";
 import PromptBox from "@/components/PromptBox";
 import DesignToolbar from "@/components/DesignToolbar";
+import { useAppContext } from "./utils/AppContext";
 
 // import ReactFlow, { Controls, Background } from 'reactflow';
 // import 'reactflow/dist/style.css';
 
 
 // import {Button}  from "@/components/button";
-// import Feedback from "./components/Feedback";
+import Feedback from "@/components/Feedback";
 
 const invite_codes = ['gtfol', 'YCS24', 'ycs24']
 
@@ -42,15 +43,22 @@ const examples = [
   "app to track my finances",
 ]
 
-function CardComponent({ 
+function CardComponent({
   componentCode, setComponentCode,
   isDark, updateUI, showEditor,
-  fetching, fetchingTab , activeTab, setActiveTab }) {
+  fetching, fetchingTab, activeTab, setActiveTab }) {
 
   const [emptyPrompt, setEmptyPrompt] = useState('');
+  const {theme} = useAppContext()
   const handleChange = (e) => {
     setEmptyPrompt(e.target.value)
   }
+
+  const saveCode = () => {
+    db.spaces.update(activeTab, { component: componentCode })
+  }
+
+
   return (
     <LiveProvider code={componentCode}
       //  noInline={true}
@@ -61,9 +69,16 @@ function CardComponent({
         useState, useEffect, Dexie, useRef, useCallback,
         Button, Card, InputField, Checkbox, Flex
       }}>
-      <Card variant="classic" className="flex-1 flex flex-col items-center " key={activeTab} >
 
-        {(fetching === true && activeTab === fetchingTab) && <Spinner size={"3"} className="mt-20" color="pink" />}
+      <Card variant="classic" className="flex-1 flex flex-col items-center pt-14 " key={activeTab} >
+
+        {(fetching === true && activeTab === fetchingTab) && <Spinner size={"3"} className={`mt-10 ${theme.appearance == "dark" ? "text-white" : "text-black"}`} />}
+
+        {(componentCode != '<></>' && fetching === false) &&
+          <div className="absolute top-2 flex flex-row">
+            <PromptBox updateUI={updateUI} fetching={fetching} />
+          </div>
+        }
 
         {(componentCode == '<></>' && fetching === false) && <div>
 
@@ -94,15 +109,13 @@ function CardComponent({
 
         <LiveError />
 
-        <div className={`w-full max-w-lg ${isDark ? "text-white" : "text-black"}`}>
-          <LivePreview />
+        <div className={`w-full flex-1 max-w-lg ${isDark ? "text-white" : "text-black"}`}>
+          <ScrollArea className="flex-1 w-full " style={{ height: 'calc(100vh - 200px)' }}>
+            <LivePreview />
+          </ScrollArea>
         </div>
 
-        {(componentCode != '<></>' && fetching === false) &&
-          <div className="absolute bottom-4 flex flex-row">
-            <PromptBox updateUI={updateUI} fetching={fetching} />
-          </div>
-        }
+
 
       </Card>
 
@@ -110,6 +123,8 @@ function CardComponent({
         <Card className="min-w-[64px] max-w-lg ml-2 font-mono">
           <Inset>
             <ScrollArea style={{ height: '750px' }}>
+              <Button onClick={saveCode} className="absolute right-2 top-2 font-mono" variant="outline" highContrast={true}> save </Button>
+
               <LiveEditor onChange={(e) => setComponentCode(e)} />
             </ScrollArea>
           </Inset>
@@ -123,6 +138,7 @@ function CardComponent({
 
 
 function Home() {
+  const { theme } = useAppContext()
   const spaces = useLiveQuery(() => db.spaces.toArray(), []);
   const [activeTab, setActiveTab] = useState(db.spaces[0]?.id);
   const [fetching, setFetching] = useState(false);
@@ -133,9 +149,9 @@ function Home() {
   const [showEditor, setShowEditor] = useState(false);
   const [componentCode, setComponentCode] = useState('<></>');
   const [showChat, setShowChat] = useState(false);
-  const [isDark, setDark] = useState<boolean>(localStorage.getItem('spaces_dark') === 'true' ? true : false)
 
   const updateUI = async ({ prompt = '' }: { prompt: string }) => {
+    
     setFetching(true);
     setFetchingTab(activeTab)
     const msg_prompt = prompt !== '' ? prompt : emptyPrompt;
@@ -176,7 +192,8 @@ function Home() {
         ]
       },
     ]
-    const base_url = 'https://api.spaces.fun'
+
+    const base_url = import.meta.env.PROD ? 'https://api.spaces.fun' : 'http://localhost:3003'
     // const base_url = 'http://localhost:3003'
     const resp = await fetch(`${base_url}/generate`,
       {
@@ -228,6 +245,8 @@ function Home() {
     }
   }, [spaces])
 
+
+
   const newTab = () => {
     const timestamp = Date.now();
     const randomId = timestamp
@@ -262,36 +281,25 @@ function Home() {
   //   const comp = eval(componentCode);
   // }
 
-  const darkmode = "bg-slate-900 opacity-80"
-
-  const toggleDark = () => {
-    setDark(!isDark)
-    localStorage.setItem('spaces_dark', !isDark)
-  }
-
+  const darkmode = `bg-slate-900 `
+  const isDark = theme.appearance === 'dark';
   return (
-    <section className={`task-home bg-grey-900 w-screen h-screen lg:max-w-full p-2 flex flex-col max-h-screen ${isDark ? darkmode : ''}  `}>
+    <section className={`task-home  w-screen h-screen lg:max-w-full p-2 flex flex-col max-h-screen ${isDark ? darkmode : ''} bg-opacity-80  `}>
 
       <div className="absolute flex flex-col items-center justify-center h-screen w-screen bg-indigo-400 bg-opacity-40 backdrop-blur-lg z-50 right-0 top-0 sm:hidden ">
-        <ComputerDesktopIcon className="h-16 w-16 text-white" />
+        <ComputerDesktopIcon className="h-16 w-16 " />
         <h1 className="text-white font-serif text-2xl color-purple-200">pls open on desktop</h1>
       </div>
 
-      <div variant="surface" className="flex flex-row justify-between items-center p-2">
+      <div variant="surface" className={`  flex flex-row justify-between items-center p-2`}>
 
         <div className="">
-          <Button variant="soft" className=" text-white normal-case text-lg" onClick={debugeroo}>spaces.</Button>
+          <Button variant="soft" className={` text-white  font-bold normal-case text-l`} onClick={debugeroo}>spaces.fun</Button>
         </div>
-
-
 
         <div className="flex flex-row items-center gap-2">
 
-          {/* <IconButton variant="ghost" className="bg-opacity-0" onClick={toggleDark}>
-            {isDark ? <SunIcon color="white" width={"20"} /> : <MoonIcon color="white" width={"20"} />}
-          </IconButton> */}
           <DesignToolbar />
-          {/* <Button onClick={toggleDark} className="font-mono" variant="outline" highContrast={true}> dark </Button> */}
 
           <LoginButton />
           {/* <Feedback /> */}
@@ -314,31 +322,34 @@ function Home() {
         <Button variant="soft" className="text-white" onClick={newTab}> + </Button>
 
         <div className="absolute right-4 gap-2 flex">
-          {/* <Button onClick={() => setShowChat(!showChat)} className="font-mono" variant="outline" highContrast={true}> chat </Button> */}
-          {/* <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button> */}
+          <Button onClick={() => setShowChat(!showChat)} className="font-mono" variant="outline" highContrast={true}> chat </Button>
+          <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button>
         </div>
       </div>
-      <div className="flex flex-row flex-1 text-black" >
+      <div className="flex flex-row flex-1 text-black " >
 
+        <CardComponent
+          key={activeTab}
+          componentCode={componentCode}
+          fetching={fetching}
+          isDark={isDark}
+          updateUI={updateUI}
+          showEditor={showEditor}
+          setComponentCode={setComponentCode}
+          fetchingTab={fetchingTab}
+          activeTab={activeTab}
+        />
 
-          <CardComponent 
-            componentCode={componentCode}
-            fetching={fetching}
-            isDark={isDark}
-            updateUI={updateUI}
-          />
-
-
-        {/* {showChat &&
-            <Card className="w-[400px] ml-2 font-mono">
-              <ChatUI />
-            </Card>
-          } */}
+        {showChat &&
+          <Card className="w-[400px] ml-2 font-mono">
+            <ChatUI />
+          </Card>
+        }
 
       </div>
 
       <div className="font-mono text-sm ml-2 absolute bottom-3 opacity-60 hover:opacity-100 left-2">
-        <p>alpha ~ v0.20</p>
+        <p>alpha ~ v0.21</p>
       </div>
     </section>
   );
@@ -388,6 +399,7 @@ type ChatMessage = {
 }
 
 const ChatUI = () => {
+  const {theme} = useAppContext()
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
 
@@ -430,7 +442,6 @@ const ChatUI = () => {
 
     console.log(messages)
 
-
     const base_url = 'http://localhost:3003'
     const resp = await fetch(`${base_url}/ask`,
       {
@@ -463,8 +474,8 @@ const ChatUI = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center">
-      <h1 className="font-bold">chat</h1>
+    <div className={`flex flex-col items-center justify-center ${theme.appearance == "dark" ? "text-white" : "text-black"}`}>
+      <h1 className="font-serif font-bold">ask anything</h1>
 
       <div className="flex flex-col items-center justify-center w-full">
         <ScrollArea style={{ height: '600px' }} >
@@ -492,9 +503,6 @@ const ChatUI = () => {
     </div>
   )
 }
-
-
-
 
 const InputField = (props) => {
   return <TextField.Root {...props} />
@@ -564,7 +572,7 @@ function PasswordScreen() {
     return urlParams.get('invite');
   };
 
-  useEffect(() => { 
+  useEffect(() => {
     const getInviteQueryParam = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const inv = urlParams.get('invite');
@@ -574,7 +582,7 @@ function PasswordScreen() {
     };
     getInviteQueryParam()
   }
-  , [])
+    , [])
 
   const handleChange = (event) => {
     setPassInput(event.target.value);
@@ -608,7 +616,7 @@ function PasswordScreen() {
 
         <Card className="m-2 max-w-md mt-8 bg-slate-950 bg-opacity-75" variant="classic">
 
-          <TextField.Root placeholder="invite code" className="w-full font-mono mb-4"  value={passInput} onChange={handleChange}
+          <TextField.Root placeholder="invite code" className="w-full font-mono mb-4" value={passInput} onChange={handleChange}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 handleSubit()
