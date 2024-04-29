@@ -321,12 +321,13 @@ function Home() {
         })}
         <Button variant="soft" className="text-white" onClick={newTab}> + </Button>
 
-        <div className="absolute right-4 gap-2 flex">
+        {/* <div className="absolute right-4 gap-2 flex">
           <Button onClick={() => setShowChat(!showChat)} className="font-mono" variant="outline" highContrast={true}> chat </Button>
           <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button>
-        </div>
+        </div> */}
       </div>
       <div className="flex flex-row flex-1 text-black " >
+       
 
         <CardComponent
           key={activeTab}

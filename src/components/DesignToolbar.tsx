@@ -53,17 +53,16 @@ function DesignToolbar() {
                         </SegmentedControl.Item>
                     </SegmentedControl.Root>
                 </div>
-                <div className="flex-1 my-6">
+                {/* <div className="flex-1 my-6">
                     <Header title="opacity" />
-                    {/* <p>{theme.appearance} {backdrop}</p> */}
                     <Slider value={[backdrop]} onValueChange={(e) =>setBackdrop(e[0])}  disabled/>
-                </div>
-                <div className="flex-1 my-6">
+                </div> */}
+                {/* <div className="flex-1 my-6">
                     <Header title="bg" />
                     <div className="flex flex-wrap w-full gap-2">
                         <img src="./bg.webp" alt="random" className="w-16 h-16 rounded-md" />
                     </div>
-                </div>
+                </div> */}
 
                 {/* <Separator className="px-[-6] w-full" />
                 <div className="flex-1 my-6">
