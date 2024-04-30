@@ -350,7 +350,7 @@ function Home() {
       </div>
 
       <div className="font-mono text-sm ml-2 absolute bottom-3 opacity-60 hover:opacity-100 left-2">
-        <p>alpha ~ v0.22</p>
+        <p>alpha ~ v0.23</p>
       </div>
     </section>
   );
