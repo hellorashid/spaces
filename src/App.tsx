@@ -194,7 +194,6 @@ function Home() {
     ]
 
     const base_url = import.meta.env.PROD ? 'https://api.spaces.fun' : 'http://localhost:3003'
-    // const base_url = 'http://localhost:3003'
     const resp = await fetch(`${base_url}/generate`,
       {
         method: "POST",
@@ -299,10 +298,11 @@ function Home() {
 
         <div className="flex flex-row items-center gap-2">
 
+          <Feedback />
+          
           <DesignToolbar />
 
           <LoginButton />
-          {/* <Feedback /> */}
 
         </div>
       </div>
@@ -443,7 +443,7 @@ const ChatUI = () => {
 
     console.log(messages)
 
-    const base_url = 'http://localhost:3003'
+    const base_url = import.meta.env.PROD ? 'https://api.spaces.fun' : 'http://localhost:3003'
     const resp = await fetch(`${base_url}/ask`,
       {
         method: "POST",
