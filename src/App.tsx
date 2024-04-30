@@ -321,10 +321,10 @@ function Home() {
         })}
         <Button variant="soft" className="text-white" onClick={newTab}> + </Button>
 
-        <div className="absolute right-4 gap-2 flex">
+        {/* <div className="absolute right-4 gap-2 flex">
           <Button onClick={() => setShowChat(!showChat)} className="font-mono" variant="outline" highContrast={true}> chat </Button>
           <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button>
-        </div>
+        </div> */}
       </div>
       <div className="flex flex-row flex-1 text-black " >
        
@@ -350,7 +350,7 @@ function Home() {
       </div>
 
       <div className="font-mono text-sm ml-2 absolute bottom-3 opacity-60 hover:opacity-100 left-2">
-        <p>alpha ~ v0.23</p>
+        <p>alpha ~ v0.24</p>
       </div>
     </section>
   );
