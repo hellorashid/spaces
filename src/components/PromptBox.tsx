@@ -10,12 +10,12 @@ const PromptBox = ({ fetching, updateUI } : { fetching: boolean, updateUI: Funct
 
   return (
     <TextField.Root
-      placeholder="wassup?"
+      placeholder="customize..."
       variant="surface"
       size="3"
       value={prompt}
       onChange={handleChange}
-      className="w-96 rounded-full"
+      className="w-96 rounded-full opacity-80 hover:opacity-100 focus:opacity-100 transition-opacity duration-200 ease-in-out outline-none"
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
           updateUI({ prompt });
