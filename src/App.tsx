@@ -46,7 +46,7 @@ const examples = [
 function CardComponent({
   componentCode, setComponentCode,
   isDark, updateUI, showEditor,
-  fetching, fetchingTab, activeTab, setActiveTab }) {
+  fetching, fetchingTab, activeTab }) {
 
   const [emptyPrompt, setEmptyPrompt] = useState('');
   const {theme} = useAppContext()
@@ -154,6 +154,7 @@ function Home() {
     
     setFetching(true);
     setFetchingTab(activeTab)
+    const current_tab = activeTab
     const msg_prompt = prompt !== '' ? prompt : emptyPrompt;
 
     if (msg_prompt === '') {
@@ -212,9 +213,9 @@ function Home() {
     if (resp.resp) {
       const comp = removeWrapper(resp.resp.content[0].text);
       setComponentCode(comp);
-      setActiveTab(fetchingTab)
+      setActiveTab(current_tab)
 
-      db.spaces.update(activeTab, { component: comp })
+      db.spaces.update(current_tab, { component: comp })
     }
 
     setFetching(false);
@@ -325,6 +326,7 @@ function Home() {
           <Button onClick={() => setShowChat(!showChat)} className="font-mono" variant="outline" highContrast={true}> chat </Button>
           <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button>
         </div> */}
+       
       </div>
       <div className="flex flex-row flex-1 text-black " >
        
@@ -350,7 +352,7 @@ function Home() {
       </div>
 
       <div className="font-mono text-sm ml-2 absolute bottom-3 opacity-60 hover:opacity-100 left-2">
-        <p>alpha ~ v0.24</p>
+        <p>alpha ~ v0.25</p>
       </div>
     </section>
   );
@@ -439,9 +441,9 @@ const ChatUI = () => {
 
 
     const data = await getData();
-    console.log(JSON.stringify(data))
+    // console.log(JSON.stringify(data))
 
-    console.log(messages)
+    // console.log(messages)
 
     const base_url = import.meta.env.PROD ? 'https://api.spaces.fun' : 'http://localhost:3003'
     const resp = await fetch(`${base_url}/ask`,
