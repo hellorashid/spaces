@@ -12,7 +12,7 @@ const PromptBox = ({ fetching, updateUI } : { fetching: boolean, updateUI: Funct
     <TextField.Root
       placeholder="customize..."
       variant="surface"
-      size="3"
+      size="2"
       value={prompt}
       onChange={handleChange}
       className="w-96 rounded-full opacity-80 hover:opacity-100 focus:opacity-100 transition-opacity duration-200 ease-in-out outline-none"
