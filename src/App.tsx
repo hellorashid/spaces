@@ -358,7 +358,7 @@ function Home() {
       </div>
       <div className="flex flex-row flex-1 overflow-scroll  rounded p-2 justify-center" >
 
-        {curr_space_index > -1 && Object.entries(spaces[curr_space_index].cards).length === 0 ?
+        {curr_space_index > -1 && Object.entries(spaces[curr_space_index]?.cards).length === 0 ?
           <CreatePromptPage updateUI={updateUI} fetching={fetching} newCard={newCard} />
           :
           <div className="flex-1 flex justify-center overflow-x-auto gap-4">
