@@ -52,8 +52,8 @@ function Feedback() {
     return (
         <Popover.Root>
             <Popover.Trigger>
-                <Button variant="soft" className='bg-purple-950 text-purple-50 mr-2' >
-                    Feedback <HeartIcon width="16" height="16" />
+                <Button variant="soft" className='bg-purple-950 text-purple-50 mr-2 font-mono' >
+                    feedback <HeartIcon width="16" height="16" />
                 </Button>
             </Popover.Trigger>
             <Popover.Content width="360px" className='bg-slate-900 bg-opacity-80 backdrop-blur-sm'>

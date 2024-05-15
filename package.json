@@ -29,7 +29,8 @@
     "react-live": "^4.1.6",
     "reactflow": "^11.10.4",
     "tailwind-merge": "^2.2.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "tldraw": "^2.1.4"
   },
   "devDependencies": {
     "@types/node": "^20.12.4",

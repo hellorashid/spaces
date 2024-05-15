@@ -8,6 +8,11 @@ const PromptBox = ({ fetching, updateUI } : { fetching: boolean, updateUI: Funct
     setPrompt(event.target.value);
   };
 
+  const handleSubmit = () => {
+    updateUI({ prompt });
+    setPrompt('');
+  }
+
   return (
     <TextField.Root
       placeholder="customize..."
@@ -18,14 +23,14 @@ const PromptBox = ({ fetching, updateUI } : { fetching: boolean, updateUI: Funct
       className="w-96 rounded-full opacity-80 hover:opacity-100 focus:opacity-100 transition-opacity duration-200 ease-in-out outline-none"
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
-          updateUI({ prompt });
+          handleSubmit();
         }
       }}
     >
       <TextField.Slot>
       </TextField.Slot>
       <TextField.Slot>
-        <Button variant="ghost" size={"3"} onClick={() => updateUI({ prompt })} color="iris" loading={fetching} className="font-serif rounded-full" highContrast>
+        <Button variant="ghost" size={"3"} onClick={handleSubmit} color="iris" loading={fetching} className="font-serif rounded-full" highContrast>
           update
         </Button>
       </TextField.Slot>

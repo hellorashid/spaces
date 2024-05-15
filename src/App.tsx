@@ -7,8 +7,9 @@ import { Resizable } from 're-resizable';
 import {
   Card, Flex, Button, TextField,
   Checkbox, IconButton, TextArea,
+  Inset,
 } from "@radix-ui/themes";
-import { ComputerDesktopIcon, SparklesIcon, MoonIcon, SunIcon } from "@heroicons/react/24/outline";
+import { ComputerDesktopIcon, SparklesIcon, MoonIcon, SunIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 import { useAppContext } from "./utils/AppContext";
 
@@ -18,8 +19,10 @@ import CreatePromptPage from "@/components/CreatePromptPage";
 import Feedback from "@/components/Feedback";
 import { TabButton } from "./components/TabButton";
 import ChatUI from "@/components/ChatUI";
-import CardComponent  from "@/components/CardComponent";
+import CardComponent from "@/components/CardComponent";
 
+// import { Tldraw } from 'tldraw'
+// import 'tldraw/tldraw.css'
 
 // import ReactFlow, { Controls, Background, Handle, Position, NodeResizer } from 'reactflow';
 // import 'reactflow/dist/style.css';
@@ -28,7 +31,7 @@ import CardComponent  from "@/components/CardComponent";
 const invite_codes = ['gtfol', 'YCS24', 'ycs24', 'aiux']
 const VERSION = '0.27'
 
-const DEV = ({children}) => {
+const DEV = ({ children }) => {
   if (import.meta.env.DEV) {
     return children
   }
@@ -42,33 +45,57 @@ db.version(1).stores({
 });
 
 
-const SingleCard = ({id, value, deleteCard }) => { 
+const SingleCard = ({id, value, deleteCard, activeTab, updateCard, fetchingCard, setFetchingCard }) => {
 
   if (value.type == 'component') {
     return (
-    <CardComponent
-      key={id}
-      componentCode={value.component_code}
-      fetching={false}
-      isDark={true}
-      updateUI={()=>{}}
-      showEditor={false}
-      setComponentCode={()=>{}}
-      fetchingTab={''}
-      activeTab={''}
-    />
+      <CardComponent
+        key={id}
+        id={id}
+        value={value}
+        showEditor={false}
+        updateCard={updateCard}
+        fetchingCard={fetchingCard}
+        setFetchingCard={setFetchingCard}
+        componentCode={value.component_code}
+
+        
+        fetching={false}
+        isDark={true}
+        updateUI={() => { }}
+        setComponentCode={() => { }}
+        fetchingTab={''}
+        activeTab={activeTab}
+      />
+    )
+  }
+
+  if (value.type == 'text') {
+    return (
+      <Card className=" bg-slate-900 p-0">
+
+        <div className="w-full p-1 px-2 flex flex-row justify-between items-center bg-slate-600 bg-opacity-30 ">
+          <p className="text-white">{value.title}</p>
+          <IconButton className=" rounded-full w-5 h-5 opacity-30 hover:opacity-100" color="red" variant="soft" onClick={() => deleteCard(id)} > <XMarkIcon width={18} /> </IconButton>
+        </div>
+        <div className="p-2">
+
+          <textarea className="w-full h-64 bg-slate-800 bg-opacity-0 text-white outline-none" placeholder="type anything..." />
+        </div>
+      </Card>
     )
   }
 
   return (
     <Card className=" bg-slate-900 rounded-md p-4">
-      <h1 className="text-white">{id}</h1>
-      <p className="text-white">type: {value.type}</p>
-      <button onClick={()=>console.log({id, value})}>hi</button>
 
-      <button onClick={()=>deleteCard(id)}>del</button>
+      <p>oopsy. 404 not found.</p>
+      {/* <input className="w-full bg-slate-800 bg-opacity-0 text-white outline-none" placeholder="type anything..." />
 
-      {/* <CreatePromptPage /> */}
+      <Button >create app</Button>
+
+      <Button >empty page</Button>
+      <Button onClick={() => deleteCard(id)} >delete</Button> */}
 
     </Card>
   )
@@ -81,28 +108,29 @@ function Home() {
   const spaces = useLiveQuery(() => db.spaces.toArray(), []);
   const [activeTab, setActiveTab] = useState(db.spaces[0]?.id);
   const [fetching, setFetching] = useState(false);
+
   const [fetchingTab, setFetchingTab] = useState('')
+  const [fetchingCard, setFetchingCard] = useState('')
 
-
-  const [emptyPrompt, setEmptyPrompt] = useState('');
   const [showEditor, setShowEditor] = useState(false);
   const [componentCode, setComponentCode] = useState('<></>');
+
   const [showChat, setShowChat] = useState(false);
+  const [showNew, setShowNew] = useState(false);
 
   const updateUI = async ({ prompt = '' }: { prompt: string }) => {
 
     setFetching(true);
     setFetchingTab(activeTab)
     const current_tab = activeTab
-    const msg_prompt = prompt !== '' ? prompt : emptyPrompt;
+    const msg_prompt = prompt
 
     if (msg_prompt === '') {
+      console.log('empty prompt')
       setFetching(false);
       setFetchingTab('')
       return;
     }
-
-    setEmptyPrompt('');
     const messages = [
       {
         "role": "user",
@@ -118,7 +146,7 @@ function Home() {
         "content": [
           {
             "type": "text",
-            "text": componentCode
+            "text": componentCode ? componentCode : "<></>"
           }
         ],
       },
@@ -133,6 +161,7 @@ function Home() {
       },
     ]
 
+    console.log({ messages })
     const base_url = import.meta.env.PROD ? 'https://api.spaces.fun' : 'http://localhost:3003'
     const resp = await fetch(`${base_url}/generate`,
       {
@@ -154,7 +183,7 @@ function Home() {
       setComponentCode(comp);
       setActiveTab(current_tab)
 
-      db.spaces.update(current_tab, { component: comp })
+      newCard({ type: 'component', component_code: comp })
     }
 
     setFetching(false);
@@ -176,12 +205,15 @@ function Home() {
 
   useEffect(() => {
     if (spaces?.length === 0) {
-      db.spaces.add({ title: 'welcome', cards: { 
-        welcome: { 
-          component_code: WelcomeComponent,
-          title: 'welcome'
+      db.spaces.add({
+        title: 'welcome', cards: {
+          welcome: {
+            component_code: WelcomeComponent,
+            type: 'component',
+            title: 'welcome'
+          }
         }
-      } })
+      })
     }
 
     if (activeTab === undefined && spaces?.length > 0) {
@@ -198,13 +230,33 @@ function Home() {
     setActiveTab(randomId);
   }
 
-  const newCard = () => { 
+  const newCard = (card = undefined) => {
     const timestamp = Date.now();
     const randomId = timestamp
     const curr_space_index = spaces.findIndex((space) => space.id === activeTab)
-    const key = 'card' + Object.keys(spaces[curr_space_index].cards).length
-    const cards = spaces[curr_space_index].cards    
-    db.spaces.update(activeTab, { cards: { ...cards , [key]: { type: '', title: 'untitled card' } } })
+    // const key = 'card' + (Object.keys(spaces[curr_space_index].cards).length  + 1)
+    const key = 'card' + randomId
+
+    const cards = spaces[curr_space_index].cards
+
+    const newCard = card ? card : { type: 'text', title: 'untitled.txt' }
+
+    console.log({ new: card })
+    const newcards = {
+      ...cards,
+      [key]: newCard
+    }
+    console.log(cards, newcards)
+    // db.spaces.update(activeTab, { cards: { ...cards , [key]: { type: 'text', title: 'untitled.txt' } } })
+    db.spaces.update(activeTab, { cards: { ...newcards } })
+
+  }
+
+  const updateCard = (cardId, newCard) => {
+    const curr_space_index = spaces.findIndex((space) => space.id === activeTab)
+    const cards = spaces[curr_space_index].cards
+    const updatedCard = { ...cards[cardId], ...newCard }
+    db.spaces.update(activeTab, { cards: { ...cards, [cardId]: updatedCard } })
   }
 
   const deleteCard = (cardId) => {
@@ -220,8 +272,9 @@ function Home() {
 
   const archiveTab = (tabId) => {
     db.spaces.delete(tabId)
+    setActiveTab(spaces[0]?.id)
   }
-  
+
   const curr_space_index = spaces?.findIndex((space) => space.id === activeTab)
   const debugeroo = () => {
     console.log(spaces)
@@ -230,24 +283,24 @@ function Home() {
     //   console.log({ key, value })
     // })
 
-    console.log(
-      
-    )
 
-   
+
   }
 
-  const darkmode = `bg-slate-900 `
+  // const darkmode = `bg-slate-900 `
+  const darkmode = `bg-gray-950`
+
   const isDark = theme.appearance === 'dark';
 
   const nodes = [
-    { id: 'node-0', type: 'tableNode', position: { x: 0, y: 50 }, data: { label: 'Node 0' }
+    {
+      id: 'node-0', type: 'tableNode', position: { x: 0, y: 50 }, data: { label: 'Node 0' }
     },
     {
       id: 'node-1',
       type: 'componentNode',
       position: { x: 350, y: 50 },
-      data: { 
+      data: {
         label: 'Node 1',
         componentCode: componentCode,
         fetching: fetching,
@@ -257,20 +310,23 @@ function Home() {
         setComponentCode: setComponentCode,
         fetchingTab: fetchingTab,
         activeTab: activeTab,
-       },
+      },
     },
   ];
 
+ 
+
   return (
-    <section className={`task-home  w-screen h-screen lg:max-w-full p-2 flex flex-col max-h-screen ${isDark ? darkmode : ''} bg-opacity-80  `}>
+    <section className={`task-home  w-screen h-screen lg:max-w-full p-2 flex flex-col max-h-screen ${isDark ? darkmode : ''} bg-opacity-90  `}>
       <div className="absolute flex flex-col items-center justify-center h-screen w-screen bg-indigo-400 bg-opacity-40 backdrop-blur-lg z-50 right-0 top-0 sm:hidden ">
         <ComputerDesktopIcon className="h-16 w-16" />
         <h1 className="text-white font-serif text-2xl color-purple-200">pls open on desktop</h1>
       </div>
 
       <div variant="surface" className={`  flex flex-row justify-between items-center p-2`}>
-        <div className="">
+        <div className="flex gap-2 items-center">
           <Button variant="soft" className={` text-white  font-bold normal-case text-l`} onClick={debugeroo}>spaces.fun</Button>
+           <p className="font-mono text-sm opacity-50">alpha v{`${VERSION}`}</p>
         </div>
         <div className="flex flex-row items-center gap-2">
           <Feedback />
@@ -291,51 +347,59 @@ function Home() {
             archiveTab={archiveTab}
           />
         })}
-        <Button variant="soft" className="text-white" onClick={newTab}> + </Button>
+        <Button variant="soft" className="text-white" onClick={() => newTab()}> + </Button>
 
-        {/* <div className="absolute right-4 gap-2 flex">
-          <Button onClick={() => setShowChat(!showChat)} className="font-mono" variant="outline" highContrast={true}> chat </Button>
-          <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button>
-        </div> */}
+        <div className="absolute right-4 gap-2 flex">
+          {/* <Button onClick={() => setShowChat(!showChat)} className="font-mono" variant="outline" highContrast={true}> chat </Button> */}
+          {/* <Button onClick={() => setShowEditor(!showEditor)} className="font-mono" variant="outline" highContrast={true}> code </Button> */}
+          {/* <Button variant="surface" className="" onClick={() => newCard()}>add page +</Button> */}
+        </div>
 
-        <DEV><button onClick={newCard}>card+</button></DEV>
-          
       </div>
       <div className="flex flex-row flex-1 overflow-scroll  rounded p-2 justify-center" >
 
         {curr_space_index > -1 && Object.entries(spaces[curr_space_index].cards).length === 0 ?
-          <CreatePromptPage updateUI={updateUI} fetching={fetching} />
+          <CreatePromptPage updateUI={updateUI} fetching={fetching} newCard={newCard} />
           :
-          // <ReactFlow nodes={nodes} nodeTypes={nodeTypes} >
-          //   <Background />
-          // </ReactFlow>
-
-          <div className=" flex-1 flex overflow-x-auto gap-4">
+          <div className="flex-1 flex justify-center overflow-x-auto gap-4">
             {(curr_space_index > -1) && Object.entries(spaces[curr_space_index]?.cards)?.map(([key, value]) => {
               return ( 
-              <Resizable className="flex-none w-fit max-w-full min-w-96 h-full" key={key} >
+                <Resizable minWidth={value.type == "component" ? 600 : 300} className="flex-none w-fit max-w-full min-w-96 h-full" key={`${activeTab}-${key}`} >
                 <SingleCard 
                     id={key} 
                     value={value} 
                     deleteCard={deleteCard}
-                />
+                    updateCard={updateCard}
+                    fetchingCard={fetchingCard}
+                    setFetchingCard={setFetchingCard}
+
+                    activeTab={activeTab}
+                  />
                </Resizable>
               )
             })}
+            {/* // <ReactFlow nodes={nodes} nodeTypes={nodeTypes} >
+            //   <Background />
+            // </ReactFlow> */}
+
+
+            {/* <Button variant="surface" className="" onClick={()=>setShowNew(true)}>add page +</Button> */}
+            {/* { showNew &&  
+          <Card className="w-96 bg-slate-900 p-4">
+            <p className="text-white">this is a card</p>
+          </Card>
+          } */}
+
           </div>
         }
 
-        {showChat &&
-          <Card className="w-[400px] ml-2 font-mono">
-            <ChatUI />
-          </Card>
-        }
+
 
       </div>
 
-      <footer className="font-mono text-sm ml-2 absolute bottom-1 opacity-60 hover:opacity-100 left-2">
+      {/* <footer className="font-mono text-sm ml-2 absolute bottom-1 opacity-60 hover:opacity-100 left-2">
         <p>alpha ~ v{`${VERSION}`}</p>
-      </footer>
+      </footer> */}
 
     </section>
   );
@@ -357,6 +421,23 @@ const WelcomeComponent = `function WelcomeScreen () {
     </div>
   )
 }`
+
+const Test = () => {
+  return (
+    <div className="flex flex-col  justify-center w-full bg-slate-700 p-4 rounded-md bg-opacity-20">
+
+      <h1 className="font-serif text-4xl">welcome to spaces</h1>
+      <p className="font-serif text-lg pb-2">an infnite workspace to create personal tools ~ to get started: </p>
+      <p className="font-serif text-lg">1. create a new tab to get started (the plus icon) </p>
+      <p className="font-serif text-lg">2. type in the kind of app you want, or begin with the examples</p>
+      <p className="font-serif text-lg">3. there are some things it cannot create. play around with it to test the limits</p>
+      <p className="font-serif text-lg">4. after you create something, use the top bar to futher customize. try changing the look, or adding features.</p>
+      <p className="font-serif text-lg">5. if something breaks, sometimes best to create a new tab and start over.</p>
+      <p className="font-serif text-lg">6. have fun :) dm me with feedback pls!</p>
+
+    </div>
+  )
+}
 
 function ErrorBoundary({ children }) {
   const [hasError, setHasError] = useState(false);
