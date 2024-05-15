@@ -29,7 +29,14 @@ import CardComponent from "@/components/CardComponent";
 
 
 const invite_codes = ['gtfol', 'YCS24', 'ycs24', 'aiux']
-const VERSION = '0.27'
+const VERSION = '0.28'
+
+const VERSION_UPDATES = { 
+  '0.28': { 
+    type: 'auto',
+  }
+}
+
 
 const DEV = ({ children }) => {
   if (import.meta.env.DEV) {
@@ -543,16 +550,64 @@ function PasswordScreen() {
   )
 }
 
+function UpdateScreen({handleUpdate}) { 
+  return (
+    <div className="flex flex-col items-center justify-center h-screen w-screen ">
+      <div className="flex flex-col items-center text-center ">
+        <h1 className="font-serif font-bold text-pink-950"> spaces.fun  </h1>
+
+        <Card className="m-2 max-w-md mt-8 bg-slate-950 bg-opacity-75" variant="classic">
+          <p className="text-white font-mono text-sm ">new update available! click below to upgrade to the latest version</p>
+          <Button variant="solid w-full" size={"3"} onClick={handleUpdate} color="iris" className="font-serif" highContrast> Update </Button>
+        </Card>
+
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [showPassword, setShowPassword] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [isUpdated, setIsUpdated] = useState(false);
+  const [showUpdateScreen, setShowUpdateScreen] = useState(false);
+  
   useEffect(() => {
     const pass = localStorage.getItem('spaces_pw');
     if (invite_codes.includes(pass)) {
       setShowPassword(false);
     }
+
+    const current_version = localStorage.getItem('spaces_version') 
+    
+    if (current_version == VERSION) {
+      console.log("VERSION:", current_version, "~ latest")
+      setIsUpdated(true);
+    } else { 
+      console.log("VERSION:" ,current_version, "~ out of date! upgrade:", VERSION)
+      
+      if (VERSION_UPDATES[VERSION]?.type === 'auto') {
+        handleUpdate()
+      } else if (VERSION_UPDATES[VERSION]?.type === 'manual') {
+        setShowUpdateScreen(true)
+      } else if (VERSION_UPDATES[VERSION]?.type === 'background') {
+        // display optional update screen
+      }
+    }
+    
     setLoading(false);
   }, [])
+
+  const handleUpdate = () => {
+    console.log("updating to version:", VERSION)
+    // do something to handle update
+
+    // on successful upgrade:
+    localStorage.setItem('spaces_version', VERSION);
+    setIsUpdated(true);
+    setShowUpdateScreen(false);
+  }
+
 
   return (
     <div className="App"
@@ -566,9 +621,15 @@ function App() {
 
       {!loading &&
         <>
-          {showPassword ?
-            <PasswordScreen /> :
-            <Home />
+          { showUpdateScreen ?
+            <UpdateScreen handleUpdate={handleUpdate} />
+            : 
+          <>
+            {showPassword ?
+              <PasswordScreen /> :
+              <Home />
+            }
+          </>
           }
         </>
       }
